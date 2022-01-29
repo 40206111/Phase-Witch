@@ -1,41 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum eDirection { none = -1, up, right, down, left }
-
-public static class EasyDir
-{
-    public static readonly eDirection[] OrderedEnum =
-        { eDirection.up, eDirection.right, eDirection.down, eDirection.left };
-    public static readonly Vector2Int[] OrderedVectors =
-        { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
-    public static Vector2Int DirFromEnum(eDirection dir)
-    {
-        return dir switch
-        {
-            eDirection.up => Vector2Int.up,
-            eDirection.right => Vector2Int.right,
-            eDirection.down => Vector2Int.down,
-            eDirection.left => Vector2Int.left,
-            _ => Vector2Int.zero
-        };
-    }
-
-    public static eDirection EnumFromDir(Vector2Int dir)
-    {
-        return dir switch
-        {
-            Vector2Int { x: 0, y: 1 } => eDirection.up,
-            Vector2Int { x: 1, y: 0 } => eDirection.right,
-            Vector2Int { x: 0, y: -1 } => eDirection.down,
-            Vector2Int { x: -1, y: 0 } => eDirection.left,
-            _ => eDirection.none
-        };
-    }
-}
+using System;
 
 public static class GameBoard
 {
+
+    public static Action<TilePiece> OnPieceEnter;
+    public static Action<TilePiece> OnPieceLeave;
+    public static Action<TilePiece> OnPieceSpawn;
+    public static Action<TilePiece> OnPieceDeath;
+    public static Action<TilePiece> OnPieceAction;
+    public static Action<TilePiece> OnPieceDamaged;
+    public static Action<TilePiece> OnPieceHealed;
+
     public static List<List<object>> Board;
     public static Vector2Int BoardSize = Vector2Int.zero;
 
