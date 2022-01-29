@@ -58,3 +58,6 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+Phase-Witch-Unity/Library
+Phase-Witch-Unity/Logs
+Phase-Witch-Unity/UserSettings
