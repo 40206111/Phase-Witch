@@ -27,14 +27,17 @@ public class RayCaster : MonoBehaviour
 
     private void DoMouseClick()
     {
-        if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit))
+        // If recently hovering cards, return
+        if (CardUserInteraction.LastHoverTime + 0.5f > Time.time)
+        {
+            return;
+        }
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit))
         {
             BVTile tile = hit.collider.GetComponentInParent<BVTile>();
             if (tile != null)
             {
-                Debug.Log(Time.time + " " + tile.TilePos);
                 tile.Clicked();
-                //GameBoard.SummonPiece(tempCard, tile.TilePos);
             }
         }
     }
