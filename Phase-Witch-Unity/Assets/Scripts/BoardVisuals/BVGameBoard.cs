@@ -39,7 +39,7 @@ public class BVGameBoard : MonoBehaviour
     private float TimeOfChange = -5.0f;
     private float TimeToFade = 5.0f;
 
-    private int ActiveFaction = (int)eFaction.player;
+    private eFaction ActiveFaction = eFaction.player;
 
     private BVTile[,] BVTiles;
 
@@ -58,15 +58,12 @@ public class BVGameBoard : MonoBehaviour
         GameBoard.InitialiseBoard(BoardSize);
 
         PromptText.gameObject.SetActive(false);
+
+        StartCoroutine(RunTurns());
     }
 
     private void Update()
     {
-        if (!AwaitingSpecific && Time.time > 1.0f)
-        {
-            StartCoroutine(RunTests());
-        }
-
         if (NewPrompt != OldPrompt)
         {
             OldPrompt = NewPrompt;
@@ -84,8 +81,8 @@ public class BVGameBoard : MonoBehaviour
     private IEnumerator RunTests()
     {
         yield return SpawnUnits();
-        yield return MoveUnits();
-        yield return FaceUnits();
+        yield return MovePhase();
+        yield return FacingPhase();
     }
 
     private IEnumerator SpawnUnits()
@@ -112,9 +109,49 @@ public class BVGameBoard : MonoBehaviour
         }
     }
 
-    private IEnumerator MoveUnits()
+
+    private IEnumerator RunTurns()
+    {
+        yield return new WaitForSeconds(3.0f);
+        bool running = true;
+        while (running)
+        {
+            NewPrompt = "Your Turn";
+            ActiveFaction = eFaction.player;
+            yield return StartCoroutine(SpawnUnits());
+            yield return StartCoroutine(CardPhase());
+            yield return StartCoroutine(MovePhase());
+            yield return StartCoroutine(FacingPhase());
+            yield return StartCoroutine(ActionPhase());
+
+            NewPrompt = "Enemy Turn";
+            ActiveFaction = eFaction.enemy;
+            //yield return StartCoroutine(CardPhase());
+            yield return StartCoroutine(MovePhase());
+            yield return StartCoroutine(FacingPhase());
+            yield return StartCoroutine(ActionPhase());
+        }
+    }
+
+    private IEnumerator CardPhase()
+    {
+        yield return null;
+    }
+
+    private IEnumerator MoveAI()
+    {
+        yield return null;
+    }
+
+    private IEnumerator MovePhase()
     {
         NewPrompt = "Move Phase";
+
+        if(ActiveFaction == eFaction.enemy)
+        {
+            yield return StartCoroutine(MoveAI());
+            yield break;
+        }
 
         List<TilePiece> potentialUnits = new List<TilePiece>();
         for (int y = 0; y < GameBoard.BoardSize.y; ++y)
@@ -185,9 +222,19 @@ public class BVGameBoard : MonoBehaviour
         }
     }
 
-    private IEnumerator FaceUnits()
+    private IEnumerator FacingAI()
+    {
+        yield return null;
+    }
+    private IEnumerator FacingPhase()
     {
         NewPrompt = "Rotate Phase";
+
+        if (ActiveFaction == eFaction.enemy)
+        {
+            yield return StartCoroutine(FacingAI());
+            yield break;
+        }
 
         List<TilePiece> potentialUnits = new List<TilePiece>();
         for (int y = 0; y < GameBoard.BoardSize.y; ++y)
@@ -232,6 +279,23 @@ public class BVGameBoard : MonoBehaviour
             }
             potentialUnits.Remove(selected);
         }
+    }
+
+    private IEnumerator ActionAI()
+    {
+        yield return null;
+    }
+    private IEnumerator ActionPhase()
+    {
+        NewPrompt = "Action Phase";
+
+        if (ActiveFaction == eFaction.enemy)
+        {
+            yield return StartCoroutine(MoveAI());
+            yield break;
+        }
+
+        yield return null;
     }
 
     private IEnumerator AwaitTile()

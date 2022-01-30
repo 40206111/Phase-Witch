@@ -15,7 +15,7 @@ public abstract class TileEntity
     public Action<TileEntity> OnFacingChanged;
 
 
-    public int Faction = -1;
+    public eFaction Faction = eFaction.none;
     protected Vector2Int _position;
     public Vector2Int Position { get { return _position; } }
     public bool IsPassable;
