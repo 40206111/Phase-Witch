@@ -6,8 +6,8 @@ using UnityEngine;
 public class Ability
 {
 
-    AbilityBaseData AbilityType;
-    int LightModifier;
-    int DarkModifier;
+    public AbilityBaseData AbilityType;
+    public int LightModifier;
+    public int DarkModifier;
 
 }
