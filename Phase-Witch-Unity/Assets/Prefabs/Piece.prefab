@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FacingMarker: {fileID: 7348639833290055645}
+  MySprite: {fileID: 7348639833654600237}
 --- !u!1 &7348639833290055643
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,6 +6,15 @@ public class BVPiece : MonoBehaviour
 {
     [SerializeField]
     Transform FacingMarker;
+    [SerializeField] SpriteRenderer MySprite;
+
+    public void Initialise(Sprite sprite)
+    {
+        if (sprite != null)
+        {
+            MySprite.sprite = sprite;
+        }
+    }
 
     public void RotateFacing(eDirection dir)
     {

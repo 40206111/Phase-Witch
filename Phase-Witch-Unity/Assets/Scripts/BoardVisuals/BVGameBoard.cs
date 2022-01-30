@@ -410,9 +410,10 @@ public class BVGameBoard : MonoBehaviour
         }
     }
 
-    private void SpawnBVPiece(TilePiece piece)
+    private void SpawnBVPiece(TilePiece piece, Sprite sprite)
     {
         BVTiles[piece.Position.x, piece.Position.y].BVPiece = Instantiate(PiecePrefab, EasyDir.Get3DFrom2D(piece.Position), Quaternion.identity, transform).GetComponent<BVPiece>();
+        BVTiles[piece.Position.x, piece.Position.y].BVPiece.Initialise(sprite);
     }
 
     public void BVTileClicked(BVTile tile)
