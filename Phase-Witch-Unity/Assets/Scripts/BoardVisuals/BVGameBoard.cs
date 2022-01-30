@@ -129,21 +129,30 @@ public class BVGameBoard : MonoBehaviour
     {
         yield return new WaitForSeconds(3.0f);
         bool running = true;
+        Hand.Instance.AddCards(CardDatabase.GetCards(4));
         while (running)
         {
             NewPrompt = "Your Turn";
+            Hand.Instance.AddCards(CardDatabase.GetCards(2));
+            yield return new WaitForSeconds(1.0f);
             ActiveFaction = eFaction.player;
             // yield return StartCoroutine(SpawnUnits());
             yield return StartCoroutine(MovePhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(FacingPhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(CardPhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(ActionPhase());
 
             NewPrompt = "Enemy Turn";
+            yield return new WaitForSeconds(1.0f);
             ActiveFaction = eFaction.enemy;
             //yield return StartCoroutine(CardPhase());
             yield return StartCoroutine(MovePhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(FacingPhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(ActionPhase());
         }
     }
@@ -212,6 +221,7 @@ public class BVGameBoard : MonoBehaviour
 
             if (!useCard)
             {
+                NewPrompt = "Can't use that right now.";
                 continue;
             }
 
