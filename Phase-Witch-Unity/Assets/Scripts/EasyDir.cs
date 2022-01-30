@@ -33,4 +33,14 @@ public static class EasyDir
             _ => eDirection.none
         };
     }
+
+    public static Vector3 Get3DFrom2D(Vector2Int pos)
+    {
+        return new Vector3(pos.x, 0, pos.y);
+    }
+
+    public static Vector2Int Get2DFrom3D(Vector3 pos)
+    {
+        return new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.z));
+    }
 }

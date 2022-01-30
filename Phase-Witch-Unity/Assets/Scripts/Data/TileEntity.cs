@@ -25,15 +25,15 @@ public abstract class TileEntity
     public TileEntity(Vector2Int pos)
     {
         _position = pos;
-        OnEntitySpawn.Invoke(this);
-        OnTileEnter(this, pos);
+        OnEntitySpawn?.Invoke(this);
+        OnTileEnter?.Invoke(this, pos);
     }
 
     public virtual void ChangePosition(Vector2Int newPos)
     {
-        OnTileLeave(this, Position);
+        OnTileLeave?.Invoke(this, Position);
         _position = newPos;
-        OnTileEnter(this, Position);
+        OnTileEnter?.Invoke(this, Position);
     }
 
 }

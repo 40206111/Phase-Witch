@@ -6,24 +6,28 @@ using System;
 public static class GameBoard
 {
 
-    public static Action<TilePiece> OnPieceEnter;
-    public static Action<TilePiece> OnPieceLeave;
+    public static Action<TilePiece, Vector2Int> OnPieceEnter;
+    public static Action<TilePiece, Vector2Int> OnPieceLeave;
     public static Action<TilePiece> OnPieceSpawn;
-    public static Action<TilePiece> OnPieceDeath;
+    public static Action<TilePiece, TilePiece> OnPieceDeath;
     public static Action<TilePiece> OnPieceAction;
-    public static Action<TilePiece> OnPieceDamaged;
-    public static Action<TilePiece> OnPieceHealed;
+    public static Action<TilePiece, int, TilePiece> OnPieceDamaged;
+    public static Action<TilePiece, int, TilePiece> OnPieceHealed;
 
-    public static List<List<object>> Board;
+    public static Tile[,] Board;
     public static Vector2Int BoardSize = Vector2Int.zero;
 
     public static void InitialiseBoard(Vector2Int size)
     {
-        Board = new List<List<object>>(size.y);
-        for (int i = 0; i < size.y; ++i)
+        Board = new Tile[size.x, size.y];
+        for (int j = 0; j < size.y; ++j)
         {
-            Board[i] = new List<object>(size.x);
+            for (int i = 0; i < size.x; ++i)
+            {
+                Board[i, j] = new Tile(new Vector2Int(i, j));
+            }
         }
+        BoardSize = size;
     }
 
     public static Vector2Int[] GetNeighboursOrdered(Vector2Int pos)
@@ -67,7 +71,7 @@ public static class GameBoard
         return false;
     }
 
-    public static object GetDataAtPos(Vector2Int pos)
+    public static Tile GetDataAtPos(Vector2Int pos)
     {
         if (IsValidPos(pos))
         {
@@ -81,8 +85,29 @@ public static class GameBoard
     /// </summary>
     /// <param name="pos"></param>
     /// <returns></returns>
-    private static object GetAtPos(Vector2Int pos)
+    private static Tile GetAtPos(Vector2Int pos)
     {
-        return Board[pos.y][pos.x];
+        return Board[pos.x, pos.y];
+    }
+
+    public static bool SummonPiece(UnitCardData cardData, Vector2Int pos)
+    {
+        bool outBool = false;
+
+        if (IsValidPos(pos))
+        {
+            Tile tile = GetAtPos(pos);
+            // If tile can hold new piece
+            if (!tile.HasPiece && !(tile.HasEffect && !tile.Effect.IsPassable))
+            {
+                TilePiece piece = new TilePiece(pos);
+                piece.Initialise(cardData);
+                tile.Piece = piece;
+                OnPieceSpawn?.Invoke(piece);//~~~
+                outBool = true;
+            }
+        }
+
+        return outBool;
     }
 }

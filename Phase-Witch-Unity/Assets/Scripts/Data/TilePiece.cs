@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public abstract class TilePiece : TileEntity
+public class TilePiece : TileEntity
 {
     public Action<TileEntity> OnAction;
     /// <summary>
@@ -16,6 +16,8 @@ public abstract class TilePiece : TileEntity
     public Action<TileEntity, int, TileEntity> OnHealed;
 
 
+    public UnitCardData CardData;
+
     public int MaxHealth;
     public int CurrentHealth;
     public int MaxDamage;
@@ -26,25 +28,34 @@ public abstract class TilePiece : TileEntity
         IsPassable = false;
     }
 
+    public void Initialise(UnitCardData data)
+    {
+        MaxHealth = data.Health;
+        CurrentHealth = MaxHealth;
+        MaxDamage = data.Damage;
+        CurrentDamage = MaxDamage;
+        CardData = data;
+    }
+
     public virtual void DoDamage(int val, TileEntity source)
     {
         CurrentHealth = Mathf.Max(CurrentHealth - val, 0);
-        OnDamage(this, val, source);
+        OnDamage?.Invoke(this, val, source);
         if (CurrentHealth == 0)
         {
-            OnEntityDeath(this, source);
+            OnEntityDeath?.Invoke(this, source);
         }
     }
 
     public virtual void DoHeal(int val, TileEntity source)
     {
         CurrentHealth = Mathf.Min(CurrentHealth + val, MaxHealth); ;
-        OnHealed(this, val, source);
+        OnHealed?.Invoke(this, val, source);
     }
 
     public virtual void DoAction()
     {
-        OnAction(this);
+        OnAction?.Invoke(this);
     }
 
 }

@@ -10,9 +10,9 @@ public abstract class TileEffect : TileEntity
         GameBoard.OnPieceEnter += OnPieceEnter;
     }
 
-    public virtual void OnPieceEnter(TilePiece piece)
+    public virtual void OnPieceEnter(TilePiece piece, Vector2Int pos)
     {
-        if (piece.Position == Position)
+        if (pos == Position)
         {
             DoEffect(piece);
         }
