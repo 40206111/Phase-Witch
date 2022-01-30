@@ -60,7 +60,17 @@ public class AbilityCardVisuals : MonoBehaviour
             output = $"{dark.AbilityName}:  {dark.AbilityDesc}";
         }
 
-        output.Replace('@', (char)mod);
+        for (int i = 0; i < output.Length; ++i)
+        {
+            if (output[i] == '@')
+            {
+                string start = i > 0 ? output.Substring(0, i) : "";
+                string replacement = mod.ToString();
+                string end = i < output.Length - 1 ? output.Substring(i + 1) : "";
+                output = start + replacement + end;
+            }
+        }
+        //output.Replace('@', mod.ToString()[0]);
 
 
         return output;
