@@ -17,8 +17,18 @@ public static class GameBoard
     public static Tile[,] Board;
     public static Vector2Int BoardSize = Vector2Int.zero;
 
+    public static List<TilePiece> AllPieces = new List<TilePiece>();
+
+    private static bool FirstTime = true;
+
     public static void InitialiseBoard(Vector2Int size)
     {
+        if (FirstTime)
+        {
+            OnPieceSpawn += OnPieceSpawnBoard;
+            OnPieceDeath += OnPieceDeathBoard;
+        }
+
         Board = new Tile[size.x, size.y];
         for (int j = 0; j < size.y; ++j)
         {
@@ -109,5 +119,32 @@ public static class GameBoard
         }
 
         return outBool;
+    }
+
+    public static bool MovePiece(TilePiece piece, Vector2Int target)
+    {
+        if (!IsValidPos(target))
+        {
+            return false;
+        }
+        OnPieceLeave?.Invoke(piece, piece.Position);
+        GetDataAtPos(piece.Position).Piece = null;
+        piece.ChangePosition(target);
+        GetDataAtPos(target).Piece = piece;
+        OnPieceEnter?.Invoke(piece, piece.Position);
+        return true;
+    }
+
+    public static void OnPieceSpawnBoard(TilePiece piece)
+    {
+        AllPieces.Add(piece);
+    }
+
+    public static void OnPieceDeathBoard(TilePiece piece, TilePiece killer)
+    {
+        if (AllPieces.Contains(piece))
+        {
+            AllPieces.Remove(piece);
+        }
     }
 }

@@ -36,4 +36,10 @@ public abstract class TileEntity
         OnTileEnter?.Invoke(this, Position);
     }
 
+    public virtual void ChangeFacing(eDirection newFace)
+    {
+        _facing = newFace;
+        OnFacingChanged?.Invoke(this);
+    }
+
 }

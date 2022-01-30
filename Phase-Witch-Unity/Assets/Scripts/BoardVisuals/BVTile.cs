@@ -8,6 +8,9 @@ public class BVTile : MonoBehaviour
     private float progress; // 0 = black, 1 = white
     private bool _isHighlighted = false;
     Material Material;
+
+    public BVPiece BVPiece;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -53,5 +56,18 @@ public class BVTile : MonoBehaviour
     {
         //progress = 0.0f;
         BVGameBoard.Instance.BVTileClicked(this);
+    }
+
+    public void AddPiece(BVPiece piece)
+    {
+        BVPiece = piece;
+        BVPiece.transform.position = transform.position;
+    }
+
+    public BVPiece RemovePiece()
+    {
+        BVPiece outPiece = BVPiece;
+        BVPiece = null;
+        return outPiece;
     }
 }

@@ -23,6 +23,8 @@ public class TilePiece : TileEntity
     public int MaxDamage;
     public int CurrentDamage;
 
+    public int MoveSpeed = 3;
+
     public TilePiece(Vector2Int pos) : base(pos)
     {
         IsPassable = false;
@@ -35,6 +37,7 @@ public class TilePiece : TileEntity
         MaxDamage = data.Damage;
         CurrentDamage = MaxDamage;
         CardData = data;
+        Faction = (int)eFaction.player;
     }
 
     public virtual void DoDamage(int val, TileEntity source)
