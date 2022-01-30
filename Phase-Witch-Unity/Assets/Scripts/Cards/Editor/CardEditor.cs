@@ -15,6 +15,7 @@ public class CardEditor : EditorWindow
     static List<AbilityBaseData> AllAbilities = new List<AbilityBaseData>();
     Vector2 ScrollPos;
     bool AbilityMode = false;
+    eAbilityType ChosenAbitlity;
 
     [MenuItem("Phase Witch/Card Editor")]
     static void Init()
@@ -46,7 +47,7 @@ public class CardEditor : EditorWindow
             LoadData();
         }
 
-        string cardOrAbility = AbilityMode ? "Ability" : "Card";
+        string cardOrAbility = AbilityMode ? "Ability" : "Spell Card";
         if (GUILayout.Button($"New {cardOrAbility}"))
         {
             if (AbilityMode)
@@ -63,6 +64,22 @@ public class CardEditor : EditorWindow
             else
             {
                 CardBaseData newCard = new CardBaseData();
+                if (AllCards == null)
+                {
+                    AllCards = new List<CardBaseData>();
+                }
+                AllCards.Add(newCard);
+                // Auto set Card ID
+                AllCards[AllCards.Count - 1].CardId = CardDataLists.NextID;
+                CardDataLists.NextID++;
+            }
+        }
+
+        if (!AbilityMode)
+        {
+            if (GUILayout.Button($"New Unit Card"))
+            {
+                UnitCardData newCard = new UnitCardData();
                 if (AllCards == null)
                 {
                     AllCards = new List<CardBaseData>();
@@ -104,7 +121,36 @@ public class CardEditor : EditorWindow
 
         foreach (var ability in AllAbilities)
         {
-            
+            ability.AbilityType = (eAbilityType)EditorGUILayout.EnumPopup("New Ability type", ability.AbilityType);
+            ability.ActivationTime = (eActivationPoint)EditorGUILayout.EnumPopup("New Ability type", ability.ActivationTime);
+            ability.DarkSideData.AbilityName = EditorGUILayout.TextField("Ability Dark Name", ability.DarkSideData.AbilityName);
+            ability.DarkSideData.AbilityDesc = EditorGUILayout.TextField("Ability Dark Desc", ability.DarkSideData.AbilityDesc);
+            Texture2D sprite = Resources.Load(ability.DarkSideData.AbilitySpritePath) as Texture2D;
+            sprite = (Texture2D)EditorGUILayout.ObjectField("Card Sprite: ", sprite, typeof(Texture2D), allowSceneObjects: true);
+            //if (sprite != null)
+            //{
+            //    ability.DarkSideData.AbilitySpritePath = sprite.name;
+            //}
+            //the above wasn't working so this is my hack
+            ability.DarkSideData.AbilitySpritePath = EditorGUILayout.TextField("Sprite Path", ability.DarkSideData.AbilitySpritePath);
+            ability.LightSideData.AbilityName = EditorGUILayout.TextField("Ability Light Name", ability.LightSideData.AbilityName);
+            ability.LightSideData.AbilityDesc = EditorGUILayout.TextField("Ability Light Desc", ability.LightSideData.AbilityDesc);
+            Texture2D sprite2 = Resources.Load(ability.LightSideData.AbilitySpritePath) as Texture2D;
+            sprite2 = (Texture2D)EditorGUILayout.ObjectField("Card Sprite: ", sprite2, typeof(Texture2D), allowSceneObjects: true);
+            //if (sprite2 != null)
+            //{
+            //    ability.LightSideData.AbilitySpritePath = sprite2.name;
+            //}
+            //the above wasn't working so this is my hack
+            ability.LightSideData.AbilitySpritePath = EditorGUILayout.TextField("Sprite Path", ability.LightSideData.AbilitySpritePath);
+
+            if (GUILayout.Button($"Delete"))
+            {
+                AllAbilities.Remove(ability);
+                break;
+            }
+
+            GUILayout.Space(40);
         }
 
         EditorGUILayout.EndScrollView();
@@ -123,19 +169,88 @@ public class CardEditor : EditorWindow
 
         foreach (var card in AllCards)
         {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"Enemy Card?: ");
+            card.EnemyCard = EditorGUILayout.Toggle(card.EnemyCard);
+            EditorGUILayout.EndHorizontal();
+            Texture2D sprite = Resources.Load(card.CardSpritePath) as Texture2D;
+            sprite = (Texture2D)EditorGUILayout.ObjectField("Card Sprite: ", sprite, typeof(Texture2D), allowSceneObjects: true);
+            //if (sprite != null)
+            //{
+            //    card.CardSpritePath = sprite.name;
+            //}
+            //the above wasn't working so this is my hack
+            card.CardSpritePath = EditorGUILayout.TextField("Sprite Path", card.CardSpritePath);
             GUILayout.Label($"Card Id:  {card.CardId}");
-            card.Damage = EditorGUILayout.IntField("Light Side Damage: ", card.Damage);
-            card.Health = EditorGUILayout.IntField("Light Side Health: ", card.Health);
 
-            Texture2D thingy = Resources.Load(card.CardSpritePath) as Texture2D;
-            var sprite = (Texture2D)EditorGUILayout.ObjectField("Card Sprite: ", thingy, typeof(Texture2D), allowSceneObjects: true);
-            if (sprite != null)
+            if (card is UnitCardData)
             {
-                card.CardSpritePath = sprite.name;
+                var unitCard = card as UnitCardData;
+
+                unitCard.Damage = EditorGUILayout.IntField("Light Side Damage", unitCard.Damage);
+                unitCard.Health = EditorGUILayout.IntField("Light Side Health", unitCard.Health);
             }
+
+            EditorGUILayout.BeginHorizontal();
+
+            GUILayout.Space(10);
+            ChosenAbitlity = (eAbilityType)EditorGUILayout.EnumPopup("New Ability type", ChosenAbitlity);
+
+            if (GUILayout.Button("Add Ability to card"))
+            {
+                Ability newAbility = AddAbilityOfType();
+                if (newAbility != null)
+                {
+                    if (card.Abilities == null)
+                    {
+                        card.Abilities = new List<Ability>();
+                    }
+                    card.Abilities.Add(newAbility);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (card.Abilities != null)
+            {
+                foreach (var ability in card.Abilities)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Label($"Ability dark side name: {ability.AbilityType.DarkSideData.AbilityName}");
+                    GUILayout.Label($"Ability light side name: {ability.AbilityType.LightSideData.AbilityName}");
+                    EditorGUILayout.EndHorizontal();
+                    ability.DarkModifier = EditorGUILayout.IntField("Dark Side Modifier", ability.DarkModifier);
+                    ability.LightModifier = EditorGUILayout.IntField("Light Side Modifier", ability.LightModifier);
+                    GUILayout.Space(10);
+
+                }
+            }
+
+            if (GUILayout.Button($"Delete"))
+            {
+                AllCards.Remove(card);
+                break;
+            }
+
+           GUILayout.Space(40);
+
         }
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndHorizontal();
+    }
+
+    Ability AddAbilityOfType()
+    {
+        foreach (var ability in AllAbilities)
+        {
+            if (ChosenAbitlity == ability.AbilityType)
+            {
+                Ability newAbility = new Ability();
+                newAbility.AbilityType = ability;
+                return newAbility;
+            }
+        }
+
+        return null;
     }
 
     void SaveData()
