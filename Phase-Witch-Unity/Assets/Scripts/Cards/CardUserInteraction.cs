@@ -38,7 +38,7 @@ public class CardUserInteraction : MonoBehaviour
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        BVGameBoard.Instance.CardPlayed(CardCon.Card);
+                        BVGameBoard.Instance.CardPlayed(CardCon);
                     }
 
                     if (Input.GetMouseButtonDown(1))

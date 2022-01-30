@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/tsSt.unity
+    guid: 725b9fb3e8c83454d9464e7b5bd9516f
+  - enabled: 1
+    path: Assets/Scenes/CardBar.unity
+    guid: 2090326bc1ba0184ca7acccc1875a98d
   m_configObjects: {}

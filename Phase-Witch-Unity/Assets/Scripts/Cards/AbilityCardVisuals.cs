@@ -25,7 +25,8 @@ public class AbilityCardVisuals : MonoBehaviour
         var dark = abilityType.DarkSideData;
 
         string spritePath = isLight ? light.AbilitySpritePath : dark.AbilitySpritePath;
-        AbilityImage = Resources.Load(spritePath) as Image;
+        var temp = Resources.Load<Sprite>(spritePath);
+        AbilityImage.sprite = temp;
 
         int modifier = isLight ? ability.LightModifier : ability.DarkModifier;
 

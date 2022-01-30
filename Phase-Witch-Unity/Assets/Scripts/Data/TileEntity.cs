@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public enum ePhased { none = -1, light, dark }
+
 public abstract class TileEntity
 {
     public Action<TileEntity> OnEntitySpawn;
@@ -14,7 +16,7 @@ public abstract class TileEntity
     public Action<TileEntity, TileEntity> OnEntityDeath;
     public Action<TileEntity> OnFacingChanged;
 
-
+    public ePhased Phase = ePhased.none;
     public eFaction Faction = eFaction.none;
     protected Vector2Int _position;
     public Vector2Int Position { get { return _position; } }

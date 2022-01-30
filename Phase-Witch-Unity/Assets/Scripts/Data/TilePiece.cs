@@ -17,6 +17,7 @@ public class TilePiece : TileEntity
 
 
     public UnitCardData CardData;
+    List<UnitAbilityBaseCode> Abilities = new List<UnitAbilityBaseCode>();
 
     public int MaxHealth;
     public int CurrentHealth;
@@ -30,14 +31,41 @@ public class TilePiece : TileEntity
         IsPassable = false;
     }
 
-    public void Initialise(UnitCardData data)
+    public void Initialise(UnitCardData data, ePhased playPhase, eFaction faction)
     {
-        MaxHealth = data.Health;
+        Phase = playPhase;
+        if (Phase == ePhased.light)
+        {
+            MaxHealth = data.Health;
+            MaxDamage = data.Damage;
+        }
+        else
+        {
+            MaxHealth = data.Damage;
+            MaxDamage = data.Health;
+        }
+            
         CurrentHealth = MaxHealth;
-        MaxDamage = data.Damage;
         CurrentDamage = MaxDamage;
+        Faction = faction;
         CardData = data;
-        Faction = (int)eFaction.player;
+        foreach(Ability ab in data.Abilities)
+        {
+            Abilities.Add(CreateAbility(ab));
+        }
+
+        OnEntitySpawn?.Invoke(this);
+    }
+
+    protected UnitAbilityBaseCode CreateAbility(Ability ab)
+    {
+        return ab.AbilityType switch
+        {
+            eAbilityType.HealthGain => new UAMaxHealthOnSpawn(this, ab),
+            eAbilityType.ThornyRoses => new UAThornyRoses(this, ab),
+            eAbilityType.BloodPact => new UABloodPact(this, ab),
+            _ => null
+        };
     }
 
     public virtual void DoDamage(int val, TileEntity source)
@@ -61,4 +89,23 @@ public class TilePiece : TileEntity
         OnAction?.Invoke(this);
     }
 
+    public virtual void SetMaxHealth(int newVal, TileEntity source)
+    {
+        int oldVal = MaxHealth;
+        MaxHealth = newVal;
+
+        int diff = newVal - oldVal;
+        if(Mathf.Sign(diff) > 0)
+        {
+            DoHeal(diff, source);
+        }
+        else
+        {
+            if(CurrentHealth > MaxHealth)
+            {
+                DoDamage(CurrentHealth - MaxHealth, source);
+            }
+        }
+
+    }
 }

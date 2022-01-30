@@ -35,7 +35,7 @@ public class BVGameBoard : MonoBehaviour
     [SerializeField]
     private RectTransform Button;
     private bool IsCardPhase = false;
-    private CardBaseData? AwaitedCard = null;
+    private CardController AwaitedCard = null;
 
     [SerializeField]
     private TextMeshProUGUI PromptText;
@@ -59,13 +59,22 @@ public class BVGameBoard : MonoBehaviour
                 BVTiles[x, y] = Instantiate(TilePrefab, new Vector3(x, 0, y), Quaternion.identity, transform).GetComponent<BVTile>();
             }
         }
-        GameBoard.OnPieceSpawn += SpawnBVPiece;
         GameBoard.InitialiseBoard(BoardSize);
 
         PromptText.gameObject.SetActive(false);
         Button.gameObject.SetActive(false);
 
         StartCoroutine(RunTurns());
+    }
+
+    private void OnEnable()
+    {
+        GameBoard.OnPieceSpawn += SpawnBVPiece;
+    }
+
+    private void OnDisable()
+    {
+        GameBoard.OnPieceSpawn -= SpawnBVPiece;
     }
 
     private void Update()
@@ -84,57 +93,66 @@ public class BVGameBoard : MonoBehaviour
         }
     }
 
-    private IEnumerator RunTests()
-    {
-        yield return SpawnUnits();
-        yield return MovePhase();
-        yield return FacingPhase();
-    }
+    //private IEnumerator RunTests()
+    //{
+    //    yield return SpawnUnits();
+    //    yield return MovePhase();
+    //    yield return FacingPhase();
+    //}
 
-    private IEnumerator SpawnUnits()
-    {
-        for (int i = 0; i < 3; ++i)
-        {
-            ValidTiles = new List<Vector2Int>();
+    //private IEnumerator SpawnUnits()
+    //{
+    //    for (int i = 0; i < 3; ++i)
+    //    {
+    //        ValidTiles = new List<Vector2Int>();
 
-            for (int y = 0; y < GameBoard.BoardSize.y; ++y)
-            {
-                for (int x = 0; x < GameBoard.BoardSize.x; x += 3)
-                {
-                    Vector2Int pos = new Vector2Int(x, y);
-                    if (!GameBoard.GetDataAtPos(pos).HasPiece && GameBoard.GetDataAtPos(pos).IsPassable)
-                    {
-                        ValidTiles.Add(pos);
-                    }
-                }
-            }
+    //        for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+    //        {
+    //            for (int x = 0; x < GameBoard.BoardSize.x; x += 3)
+    //            {
+    //                Vector2Int pos = new Vector2Int(x, y);
+    //                if (!GameBoard.GetDataAtPos(pos).HasPiece && GameBoard.GetDataAtPos(pos).IsPassable)
+    //                {
+    //                    ValidTiles.Add(pos);
+    //                }
+    //            }
+    //        }
 
-            yield return StartCoroutine(AwaitTile());
+    //        yield return StartCoroutine(AwaitTile());
 
-            GameBoard.SummonPiece(RayCaster.tempCard, AwaitedTile.Value); // ~~~
-        }
-    }
+    //        GameBoard.SummonPiece(RayCaster.tempCard, AwaitedTile.Value); // ~~~
+    //    }
+    //}
 
 
     private IEnumerator RunTurns()
     {
         yield return new WaitForSeconds(3.0f);
         bool running = true;
+        Hand.Instance.AddCards(CardDatabase.GetCards(4));
         while (running)
         {
             NewPrompt = "Your Turn";
+            Hand.Instance.AddCards(CardDatabase.GetCards(2));
+            yield return new WaitForSeconds(1.0f);
             ActiveFaction = eFaction.player;
-            yield return StartCoroutine(SpawnUnits());
-            yield return StartCoroutine(CardPhase());
+            // yield return StartCoroutine(SpawnUnits());
             yield return StartCoroutine(MovePhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(FacingPhase());
+            yield return new WaitForSeconds(1.0f);
+            yield return StartCoroutine(CardPhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(ActionPhase());
 
             NewPrompt = "Enemy Turn";
+            yield return new WaitForSeconds(1.0f);
             ActiveFaction = eFaction.enemy;
             //yield return StartCoroutine(CardPhase());
             yield return StartCoroutine(MovePhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(FacingPhase());
+            yield return new WaitForSeconds(1.0f);
             yield return StartCoroutine(ActionPhase());
         }
     }
@@ -144,15 +162,111 @@ public class BVGameBoard : MonoBehaviour
         NewPrompt = "Card Phase";
 
         IsCardPhase = true;
-        AwaitedCard = null;
         Button.gameObject.SetActive(true);
-        while (IsCardPhase && AwaitedCard == null)
+        while (IsCardPhase)
         {
-            yield return null;
+            AwaitedCard = null;
+            while (IsCardPhase && AwaitedCard == null)
+            {
+                yield return null;
+            }
+            if (!IsCardPhase)
+            {
+                break;
+            }
 
             ValidTiles = new List<Vector2Int>();
-            // ~~~ populate valid
+            bool isUnit = false;
+            bool useCard = true;
+            SpellAbilityBaseCode spell = null;
+            // populate valid
+            if (AwaitedCard.Card is UnitCardData unitCard)
+            {
+                isUnit = true;
+                for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+                {
+                    for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+                    {
+                        Vector2Int pos = new Vector2Int(x, y);
+                        if (GameBoard.GetDataAtPos(pos).IsPassable)
+                        {
+                            ValidTiles.Add(pos);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                unitCard = null;
+                spell = SpellFactory.GetSpell(AwaitedCard.Card.Abilities[0], AwaitedCard.IsLight ? ePhased.light : ePhased.dark);
+                if (spell.NumOfTargets > GameBoard.AllPieces.Count)
+                {
+                    useCard = false;
+                }
+                else
+                {
+                    for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+                    {
+                        for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+                        {
+                            Vector2Int pos = new Vector2Int(x, y);
+                            if (GameBoard.GetDataAtPos(pos).HasPiece)
+                            {
+                                ValidTiles.Add(pos);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!useCard)
+            {
+                NewPrompt = "Can't use that right now.";
+                continue;
+            }
+
+            if (isUnit)
+            {
+                NewPrompt = "Choose Spawn Point";
+            }
+            else
+            {
+                NewPrompt = spell.GetSelectionDialogue();
+            }
             yield return StartCoroutine(AwaitTile());
+
+            if (isUnit)
+            {
+                GameBoard.SummonPiece(unitCard, AwaitedCard.IsLight ? ePhased.light : ePhased.dark, ActiveFaction,
+                    AwaitedTile.Value);
+            }
+            else
+            {
+                List<Vector2Int> usedTargets = new List<Vector2Int>() { AwaitedTile.Value };
+                string prompt = spell.AddTarget(GameBoard.GetDataAtPos(AwaitedTile.Value).Piece);
+                while (prompt != "")
+                {
+                    ValidTiles = new List<Vector2Int>();
+                    for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+                    {
+                        for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+                        {
+                            Vector2Int pos = new Vector2Int(x, y);
+                            if (GameBoard.GetDataAtPos(pos).HasPiece && !usedTargets.Contains(pos))
+                            {
+                                ValidTiles.Add(pos);
+                            }
+                        }
+                    }
+
+                    NewPrompt = prompt;
+                    yield return StartCoroutine(AwaitTile());
+                    prompt = spell.AddTarget(GameBoard.GetDataAtPos(AwaitedTile.Value).Piece);
+                }
+                spell.DoSpell();
+            }
+
+            Destroy(AwaitedCard.gameObject, 0.05f);
         }
         IsCardPhase = false;
         Button.gameObject.SetActive(false);
@@ -168,7 +282,7 @@ public class BVGameBoard : MonoBehaviour
     {
         NewPrompt = "Move Phase";
 
-        if(ActiveFaction == eFaction.enemy)
+        if (ActiveFaction == eFaction.enemy)
         {
             yield return StartCoroutine(MoveAI());
             yield break;
@@ -188,7 +302,7 @@ public class BVGameBoard : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < 2 && potentialUnits.Count != 0; ++i)
         {
             #region choose piece to move
             ValidTiles = new List<Vector2Int>();
@@ -342,9 +456,10 @@ public class BVGameBoard : MonoBehaviour
         }
     }
 
-    private void SpawnBVPiece(TilePiece piece)
+    private void SpawnBVPiece(TilePiece piece, Sprite sprite)
     {
         BVTiles[piece.Position.x, piece.Position.y].BVPiece = Instantiate(PiecePrefab, EasyDir.Get3DFrom2D(piece.Position), Quaternion.identity, transform).GetComponent<BVPiece>();
+        BVTiles[piece.Position.x, piece.Position.y].BVPiece.Initialise(sprite);
     }
 
     public void BVTileClicked(BVTile tile)
@@ -355,9 +470,9 @@ public class BVGameBoard : MonoBehaviour
         }
     }
 
-    public void CardPlayed(CardBaseData card)
+    public void CardPlayed(CardController card)
     {
-        if(AwaitedCard != null)
+        if (AwaitedCard != null)
         {
             return;
         }
