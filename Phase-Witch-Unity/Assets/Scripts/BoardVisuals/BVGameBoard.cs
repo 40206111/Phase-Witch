@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public enum eFaction { none = -1, player, enemy }
 public class BVGameBoard : MonoBehaviour
@@ -31,6 +32,13 @@ public class BVGameBoard : MonoBehaviour
     private List<Vector2Int> ValidTiles = new List<Vector2Int>();
     private Vector2Int? AwaitedTile = null;
 
+    [SerializeField]
+    private TextMeshProUGUI PromptText;
+    private string OldPrompt = "";
+    private string NewPrompt = "";
+    private float TimeOfChange = -5.0f;
+    private float TimeToFade = 5.0f;
+
     private int ActiveFaction = (int)eFaction.player;
 
     private BVTile[,] BVTiles;
@@ -48,6 +56,8 @@ public class BVGameBoard : MonoBehaviour
         }
         GameBoard.OnPieceSpawn += SpawnBVPiece;
         GameBoard.InitialiseBoard(BoardSize);
+
+        PromptText.gameObject.SetActive(false);
     }
 
     private void Update()
@@ -55,6 +65,19 @@ public class BVGameBoard : MonoBehaviour
         if (!AwaitingSpecific && Time.time > 1.0f)
         {
             StartCoroutine(RunTests());
+        }
+
+        if (NewPrompt != OldPrompt)
+        {
+            OldPrompt = NewPrompt;
+            PromptText.text = NewPrompt;
+            TimeOfChange = Time.time;
+            PromptText.gameObject.SetActive(true);
+        }
+
+        if (PromptText.gameObject.activeInHierarchy && (TimeOfChange + TimeToFade <= Time.time))
+        {
+            PromptText.gameObject.SetActive(false);
         }
     }
 
@@ -91,6 +114,8 @@ public class BVGameBoard : MonoBehaviour
 
     private IEnumerator MoveUnits()
     {
+        NewPrompt = "Move Phase";
+
         List<TilePiece> potentialUnits = new List<TilePiece>();
         for (int y = 0; y < GameBoard.BoardSize.y; ++y)
         {
@@ -162,6 +187,8 @@ public class BVGameBoard : MonoBehaviour
 
     private IEnumerator FaceUnits()
     {
+        NewPrompt = "Rotate Phase";
+
         List<TilePiece> potentialUnits = new List<TilePiece>();
         for (int y = 0; y < GameBoard.BoardSize.y; ++y)
         {
