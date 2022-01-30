@@ -104,7 +104,7 @@ public static class GameBoard
         return Board[pos.x, pos.y];
     }
 
-    public static bool SummonPiece(UnitCardData cardData, Vector2Int pos)
+    public static bool SummonPiece(UnitCardData cardData, ePhased phase, eFaction faction, Vector2Int pos)
     {
         bool outBool = false;
 
@@ -115,7 +115,7 @@ public static class GameBoard
             if (!tile.HasPiece && !(tile.HasEffect && !tile.Effect.IsPassable))
             {
                 TilePiece piece = new TilePiece(pos);
-                piece.Initialise(cardData);
+                piece.Initialise(cardData, phase, faction);
                 tile.Piece = piece;
                 OnPieceSpawn?.Invoke(piece);//~~~
                 outBool = true;
