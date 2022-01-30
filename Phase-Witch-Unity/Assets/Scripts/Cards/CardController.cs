@@ -87,7 +87,7 @@ public class CardController : MonoBehaviour
             }
         }
 
-        CardImage = Resources.Load(card.CardSpritePath) as Image;
+        CardImage.sprite = Resources.Load<Sprite>(card.CardSpritePath);
 
         if (card is UnitCardData)
         {
