@@ -6,7 +6,7 @@ using UnityEngine;
 public class Ability
 {
 
-    public AbilityBaseData AbilityType;
+    public eAbilityType AbilityType;
     public int LightModifier;
     public int DarkModifier;
 

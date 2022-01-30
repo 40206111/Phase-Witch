@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 897880e9e5706b643ac4eccb7ecd5903
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Marcha
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 0568fd42fbcb051419e2e0452ccd4a9b, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
