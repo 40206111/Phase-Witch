@@ -1,0 +1,89 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class AbilityCardVisuals : MonoBehaviour
+{
+    [SerializeField]
+    GameObject AbilityDesc;
+    [SerializeField]
+    GameObject Value;
+    Image AbilityImage;
+
+    private void Awake()
+    {
+        AbilityImage = GetComponent<Image>();
+    }
+
+    public void InitialiseAbility(Ability ability, bool isLight)
+    {
+        var abilityType = CardDatabase.GetAbilityFromType(ability.AbilityType);
+        var light = abilityType.LightSideData;
+        var dark = abilityType.DarkSideData;
+
+        string spritePath = isLight ? light.AbilitySpritePath : dark.AbilitySpritePath;
+        AbilityImage = Resources.Load(spritePath) as Image;
+
+        int modifier = isLight ? ability.LightModifier : ability.DarkModifier;
+
+        AbilityDesc.GetComponentInChildren<TextMeshProUGUI>().text = AbilityDescription(abilityType, isLight, modifier);
+
+        if (modifier == 0)
+        {
+            Value.SetActive(false);
+        }
+        else
+        {
+            Value.SetActive(true);
+            var tmp = Value.GetComponentInChildren<TextMeshProUGUI>();
+            tmp.text = modifier.ToString();
+        }
+
+
+    }
+
+    string AbilityDescription(AbilityBaseData ability, bool isLight, int mod)
+    {
+        string output;
+
+        if (isLight)
+        {
+            var light = ability.LightSideData;
+            output = $"{light.AbilityName}:  {light.AbilityDesc}";
+
+        }
+        else
+        {
+            var dark = ability.DarkSideData;
+            output = $"{dark.AbilityName}:  {dark.AbilityDesc}";
+        }
+
+        output.Replace('@', (char)mod);
+
+
+        return output;
+    }
+
+    public void OnFocus()
+    {
+        AbilityDesc.SetActive(true);
+    }
+
+    public void OnLoseFocus()
+    {
+        AbilityDesc.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        AbilityDesc.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        AbilityDesc.SetActive(true);
+    }
+
+}

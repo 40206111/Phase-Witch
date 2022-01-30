@@ -1,15 +1,14 @@
 using Newtonsoft.Json;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
 
 public class CardEditor : EditorWindow
 
 {
 
+    JsonSerializerSettings JsonSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
     static CardDataLists AllLists = new CardDataLists();
     static List<CardBaseData> AllCards = new List<CardBaseData>();
     static List<AbilityBaseData> AllAbilities = new List<AbilityBaseData>();
@@ -28,7 +27,7 @@ public class CardEditor : EditorWindow
 
     private void OnFocus()
     {
-        LoadData();
+        //LoadData();
     }
 
     void OnGUI()
@@ -215,8 +214,7 @@ public class CardEditor : EditorWindow
                 foreach (var ability in card.Abilities)
                 {
                     EditorGUILayout.BeginHorizontal();
-                    GUILayout.Label($"Ability dark side name: {ability.AbilityType.DarkSideData.AbilityName}");
-                    GUILayout.Label($"Ability light side name: {ability.AbilityType.LightSideData.AbilityName}");
+                    GUILayout.Label($"Ability type: {ability.AbilityType}");
                     EditorGUILayout.EndHorizontal();
                     ability.DarkModifier = EditorGUILayout.IntField("Dark Side Modifier", ability.DarkModifier);
                     ability.LightModifier = EditorGUILayout.IntField("Light Side Modifier", ability.LightModifier);
@@ -231,7 +229,7 @@ public class CardEditor : EditorWindow
                 break;
             }
 
-           GUILayout.Space(40);
+            GUILayout.Space(40);
 
         }
         EditorGUILayout.EndScrollView();
@@ -245,7 +243,7 @@ public class CardEditor : EditorWindow
             if (ChosenAbitlity == ability.AbilityType)
             {
                 Ability newAbility = new Ability();
-                newAbility.AbilityType = ability;
+                newAbility.AbilityType = ChosenAbitlity;
                 return newAbility;
             }
         }
@@ -265,8 +263,8 @@ public class CardEditor : EditorWindow
 
         AllLists.AllCards = AllCards;
         AllLists.AllAbilities = AllAbilities;
-        
-        string json = JsonConvert.SerializeObject(AllLists);
+
+        string json = JsonConvert.SerializeObject(AllLists, JsonSettings);
         Debug.Log($"Saved File");
 
         File.WriteAllText(filePath, json);
@@ -279,36 +277,13 @@ public class CardEditor : EditorWindow
         var cardData = File.ReadAllText(filePath);
         Debug.Log(cardData);
 
-        AllLists = JsonUtility.FromJson<CardDataLists>(cardData);
+        AllLists = JsonConvert.DeserializeObject<CardDataLists>(cardData, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
         AllCards = AllLists.AllCards;
         AllAbilities = AllLists.AllAbilities;
         CardDataLists.NextID = AllCards.Count;
-        
+
         Debug.Log($"Loaded File");
 
     }
-
-    ////this should work with webGL
-    //IEnumerator ReadData()
-    //{
-    //    string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, "CardData.Json");
-
-    //    string cardData;
-
-    //    //find file path
-    //    if (filePath.Contains("://")) //if on web
-    //    {
-    //        UnityWebRequest www = new UnityWebRequest(filePath);
-    //        yield return www.SendWebRequest();
-    //        cardData = www.downloadHandler.text;
-    //    }
-    //    else
-    //    {
-    //        cardData = System.IO.File.ReadAllText(filePath);
-    //    }
-
-    //    AllCards = JsonUtility.FromJson<List<CardBaseData>>(cardData);
-
-    //}
 
 }
