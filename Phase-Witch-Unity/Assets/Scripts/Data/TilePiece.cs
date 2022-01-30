@@ -63,6 +63,7 @@ public class TilePiece : TileEntity
         {
             eAbilityType.HealthGain => new UAMaxHealthOnSpawn(this, ab),
             eAbilityType.ThornyRoses => new UAThornyRoses(this, ab),
+            eAbilityType.BloodPact => new UABloodPact(this, ab),
             _ => null
         };
     }

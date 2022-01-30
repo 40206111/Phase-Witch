@@ -168,6 +168,8 @@ public class BVGameBoard : MonoBehaviour
 
             ValidTiles = new List<Vector2Int>();
             bool isUnit = false;
+            bool useCard = true;
+            SpellAbilityBaseCode spell = null;
             // populate valid
             if (AwaitedCard.Card is UnitCardData unitCard)
             {
@@ -187,17 +189,30 @@ public class BVGameBoard : MonoBehaviour
             else
             {
                 unitCard = null;
-                for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+                spell = SpellFactory.GetSpell(AwaitedCard.Card.Abilities[0], AwaitedCard.IsLight ? ePhased.light : ePhased.dark);
+                if (spell.NumOfTargets > GameBoard.AllPieces.Count)
                 {
-                    for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+                    useCard = false;
+                }
+                else
+                {
+                    for (int y = 0; y < GameBoard.BoardSize.y; ++y)
                     {
-                        Vector2Int pos = new Vector2Int(x, y);
-                        if (GameBoard.GetDataAtPos(pos).HasPiece)
+                        for (int x = 0; x < GameBoard.BoardSize.x; ++x)
                         {
-                            ValidTiles.Add(pos);
+                            Vector2Int pos = new Vector2Int(x, y);
+                            if (GameBoard.GetDataAtPos(pos).HasPiece)
+                            {
+                                ValidTiles.Add(pos);
+                            }
                         }
                     }
                 }
+            }
+
+            if (!useCard)
+            {
+                continue;
             }
 
             if (isUnit)
@@ -206,9 +221,8 @@ public class BVGameBoard : MonoBehaviour
             }
             else
             {
-                NewPrompt = "Pick Spell Target";
+                NewPrompt = spell.GetSelectionDialogue();
             }
-
             yield return StartCoroutine(AwaitTile());
 
             if (isUnit)
@@ -218,8 +232,30 @@ public class BVGameBoard : MonoBehaviour
             }
             else
             {
-                // ~~~ somehow perform spell
+                List<Vector2Int> usedTargets = new List<Vector2Int>() { AwaitedTile.Value };
+                string prompt = spell.AddTarget(GameBoard.GetDataAtPos(AwaitedTile.Value).Piece);
+                while (prompt != "")
+                {
+                    ValidTiles = new List<Vector2Int>();
+                    for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+                    {
+                        for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+                        {
+                            Vector2Int pos = new Vector2Int(x, y);
+                            if (GameBoard.GetDataAtPos(pos).HasPiece && !usedTargets.Contains(pos))
+                            {
+                                ValidTiles.Add(pos);
+                            }
+                        }
+                    }
+
+                    NewPrompt = spell.GetSelectionDialogue();
+                    yield return StartCoroutine(AwaitTile());
+                    prompt = spell.AddTarget(GameBoard.GetDataAtPos(AwaitedTile.Value).Piece);
+                }
+                spell.DoSpell();
             }
+
             Destroy(AwaitedCard.gameObject, 0.05f);
         }
         IsCardPhase = false;
