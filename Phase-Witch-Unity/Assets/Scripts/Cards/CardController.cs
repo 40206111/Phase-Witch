@@ -22,10 +22,52 @@ public class CardController : MonoBehaviour
 
     private CardBaseData _card;
     public CardBaseData Card { get { return _card; } }
+    public bool IsLight = true;
+
+    bool Focused = false;
 
     public void flip()
     {
+        IsLight = !IsLight;
+        Focused = false;
         Animator.SetTrigger("Flip");
+    }
+
+    void ShowAbilityDescs(bool show)
+    {
+        foreach (var ability in DarkAbilities)
+        {
+            if (show && !IsLight)
+            {
+                ability.OnFocus();
+            }
+            else
+            {
+                ability.OnLoseFocus();
+            }
+        }
+        foreach (var ability in LightAbilities)
+        {
+            if (show && IsLight)
+            {
+                ability.OnFocus();
+            }
+            else
+            {
+                ability.OnLoseFocus();
+            }
+        }
+    }
+
+    public void OnFocus(bool focus)
+    {
+        if (Focused == focus) return;
+
+        ShowAbilityDescs(focus);
+
+        Animator.SetBool("Hover", focus);
+
+        Focused = focus;
     }
 
     public void ShowCardData(CardBaseData card)

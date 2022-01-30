@@ -27,6 +27,8 @@ public class CardUserInteraction : MonoBehaviour
         ped.position = Input.mousePosition;
         List<RaycastResult> ress = new List<RaycastResult>();
         gRay.Raycast(ped, ress);
+
+        CardCon.OnFocus(false);
         foreach (RaycastResult hit in ress)
         {
             if (hit.gameObject != null)
@@ -34,16 +36,25 @@ public class CardUserInteraction : MonoBehaviour
                 CardController carCon = hit.gameObject.GetComponentInParent<CardController>();
                 if (carCon != null && carCon == CardCon)
                 {
-                    transform.Translate(5.0f * Time.deltaTime * Vector3.up);
                     if (Input.GetMouseButtonDown(0))
                     {
                         BVGameBoard.Instance.CardPlayed(CardCon.Card);
                     }
+
+                    if (Input.GetMouseButtonDown(1))
+                    {
+                        CardCon.flip();
+                    }
+                    CardCon.OnFocus(true);
                 }
+
+                CardCon = carCon;
                 LastHoverTime = Time.time;
                 break;
             }
         }
+
+
 
     }
 }

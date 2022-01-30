@@ -11,6 +11,7 @@ public class AbilityCardVisuals : MonoBehaviour
     [SerializeField]
     GameObject Value;
     Image AbilityImage;
+    bool SetUp;
 
     private void Awake()
     {
@@ -41,7 +42,8 @@ public class AbilityCardVisuals : MonoBehaviour
             tmp.text = modifier.ToString();
         }
 
-
+        SetUp = true;
+        OnLoseFocus();
     }
 
     string AbilityDescription(AbilityBaseData ability, bool isLight, int mod)
@@ -78,6 +80,7 @@ public class AbilityCardVisuals : MonoBehaviour
 
     public void OnFocus()
     {
+        if (!SetUp) return;
         AbilityDesc.SetActive(true);
     }
 

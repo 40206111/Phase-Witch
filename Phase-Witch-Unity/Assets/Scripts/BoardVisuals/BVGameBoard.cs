@@ -149,6 +149,10 @@ public class BVGameBoard : MonoBehaviour
         while (IsCardPhase && AwaitedCard == null)
         {
             yield return null;
+
+            ValidTiles = new List<Vector2Int>();
+            // ~~~ populate valid
+            yield return StartCoroutine(AwaitTile());
         }
         IsCardPhase = false;
         Button.gameObject.SetActive(false);
