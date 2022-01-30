@@ -1,9 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public abstract class TileEntity
 {
+    public Action<TileEntity> OnEntitySpawn;
+    public Action<TileEntity, Vector2Int> OnTileLeave;
+    public Action<TileEntity, Vector2Int> OnTileEnter;
+    /// <summary>
+    /// The dead entity, the killer.
+    /// </summary>
+    public Action<TileEntity, TileEntity> OnEntityDeath;
+    public Action<TileEntity> OnFacingChanged;
+
+
+    public int Faction = -1;
     protected Vector2Int _position;
     public Vector2Int Position { get { return _position; } }
     public bool IsPassable;
@@ -13,20 +25,15 @@ public abstract class TileEntity
     public TileEntity(Vector2Int pos)
     {
         _position = pos;
-        OnEntitySpawn();
-        OnTileEnter();
+        OnEntitySpawn.Invoke(this);
+        OnTileEnter(this, pos);
     }
 
     public virtual void ChangePosition(Vector2Int newPos)
     {
-        OnTileLeave();
+        OnTileLeave(this, Position);
         _position = newPos;
-        OnTileEnter();
+        OnTileEnter(this, Position);
     }
 
-    public abstract void OnEntitySpawn();
-    public abstract void OnTileLeave();
-    public abstract void OnTileEnter();
-    public abstract void OnEntityDeath();
-    public abstract void OnFacingChanged();
 }
