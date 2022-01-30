@@ -35,7 +35,7 @@ public class BVGameBoard : MonoBehaviour
     [SerializeField]
     private RectTransform Button;
     private bool IsCardPhase = false;
-    private Object? AwaitedCard = null;
+    private CardBaseData? AwaitedCard = null;
 
     [SerializeField]
     private TextMeshProUGUI PromptText;
@@ -141,6 +141,8 @@ public class BVGameBoard : MonoBehaviour
 
     private IEnumerator CardPhase()
     {
+        NewPrompt = "Card Phase";
+
         IsCardPhase = true;
         AwaitedCard = null;
         Button.gameObject.SetActive(true);
@@ -347,6 +349,15 @@ public class BVGameBoard : MonoBehaviour
         {
             AwaitedTile = tile.TilePos;
         }
+    }
+
+    public void CardPlayed(CardBaseData card)
+    {
+        if(AwaitedCard != null)
+        {
+            return;
+        }
+        AwaitedCard = card;
     }
 
     public void EndCardPhaseClicked()

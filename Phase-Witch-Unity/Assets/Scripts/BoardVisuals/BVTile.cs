@@ -50,6 +50,7 @@ public class BVTile : MonoBehaviour
 
     private void SetMaterialColour(float val)
     {
+        // Debug.Log(val);
         Material.color = new Color(val, val, val);
     }
 

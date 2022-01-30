@@ -20,6 +20,9 @@ public class CardController : MonoBehaviour
     [SerializeField]
     Animator Animator;
 
+    private CardBaseData _card;
+    public CardBaseData Card { get { return _card; } }
+
     public void flip()
     {
         Animator.SetTrigger("Flip");
@@ -27,7 +30,7 @@ public class CardController : MonoBehaviour
 
     public void ShowCardData(CardBaseData card)
     {
-
+        _card = card;
         for (int i = 0; i < LightAbilities.Count; ++i)
         {
             if (card.Abilities.Count > i)

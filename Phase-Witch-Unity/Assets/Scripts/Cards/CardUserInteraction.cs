@@ -35,6 +35,10 @@ public class CardUserInteraction : MonoBehaviour
                 if (carCon != null && carCon == CardCon)
                 {
                     transform.Translate(5.0f * Time.deltaTime * Vector3.up);
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        BVGameBoard.Instance.CardPlayed(CardCon.Card);
+                    }
                 }
                 LastHoverTime = Time.time;
                 break;
