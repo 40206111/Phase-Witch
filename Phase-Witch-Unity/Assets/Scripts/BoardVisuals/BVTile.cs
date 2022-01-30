@@ -43,7 +43,8 @@ public class BVTile : MonoBehaviour
 
     private void UpdateHighlighting()
     {
-        progress = (Mathf.Sin(Time.time * Mathf.PI) + 1) * 0.4f;
+        // float halfHeight = 0.4f;
+        progress = (Mathf.Sin(Time.time * Mathf.PI) * 0.15f) + 0.2f;
         SetMaterialColour(progress);
     }
 

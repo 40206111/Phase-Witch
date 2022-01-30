@@ -33,6 +33,11 @@ public class BVGameBoard : MonoBehaviour
     private Vector2Int? AwaitedTile = null;
 
     [SerializeField]
+    private RectTransform Button;
+    private bool IsCardPhase = false;
+    private Object? AwaitedCard = null;
+
+    [SerializeField]
     private TextMeshProUGUI PromptText;
     private string OldPrompt = "";
     private string NewPrompt = "";
@@ -58,6 +63,7 @@ public class BVGameBoard : MonoBehaviour
         GameBoard.InitialiseBoard(BoardSize);
 
         PromptText.gameObject.SetActive(false);
+        Button.gameObject.SetActive(false);
 
         StartCoroutine(RunTurns());
     }
@@ -135,7 +141,16 @@ public class BVGameBoard : MonoBehaviour
 
     private IEnumerator CardPhase()
     {
-        yield return null;
+        IsCardPhase = true;
+        AwaitedCard = null;
+        Button.gameObject.SetActive(true);
+        while (IsCardPhase && AwaitedCard == null)
+        {
+            yield return null;
+        }
+        IsCardPhase = false;
+        Button.gameObject.SetActive(false);
+        AwaitedCard = null;
     }
 
     private IEnumerator MoveAI()
@@ -332,5 +347,10 @@ public class BVGameBoard : MonoBehaviour
         {
             AwaitedTile = tile.TilePos;
         }
+    }
+
+    public void EndCardPhaseClicked()
+    {
+        IsCardPhase = false;
     }
 }
