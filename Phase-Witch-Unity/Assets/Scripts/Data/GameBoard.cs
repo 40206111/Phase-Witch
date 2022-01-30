@@ -8,7 +8,7 @@ public static class GameBoard
 
     public static Action<TilePiece, Vector2Int> OnPieceEnter;
     public static Action<TilePiece, Vector2Int> OnPieceLeave;
-    public static Action<TilePiece> OnPieceSpawn;
+    public static Action<TilePiece, Sprite> OnPieceSpawn;
     public static Action<TilePiece, TilePiece> OnPieceDeath;
     public static Action<TilePiece> OnPieceAction;
     public static Action<TilePiece, int, TilePiece> OnPieceDamaged;
@@ -117,7 +117,13 @@ public static class GameBoard
                 TilePiece piece = new TilePiece(pos);
                 piece.Initialise(cardData, phase, faction);
                 tile.Piece = piece;
-                OnPieceSpawn?.Invoke(piece);//~~~
+
+                string side = phase == ePhased.light ? "Light" : "Dark";
+                string path = $"piece/{side}/{cardData.CardSpritePath}";
+                Debug.Log(path);
+                var sprite = Resources.Load<Sprite>(path);
+                Debug.Log(sprite);
+                OnPieceSpawn?.Invoke(piece, sprite);//~~~
                 outBool = true;
             }
         }
@@ -139,7 +145,7 @@ public static class GameBoard
         return true;
     }
 
-    public static void OnPieceSpawnBoard(TilePiece piece)
+    public static void OnPieceSpawnBoard(TilePiece piece, Sprite sprite = null)
     {
         AllPieces.Add(piece);
     }
