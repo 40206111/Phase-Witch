@@ -249,7 +249,7 @@ public class BVGameBoard : MonoBehaviour
                         }
                     }
 
-                    NewPrompt = spell.GetSelectionDialogue();
+                    NewPrompt = prompt;
                     yield return StartCoroutine(AwaitTile());
                     prompt = spell.AddTarget(GameBoard.GetDataAtPos(AwaitedTile.Value).Piece);
                 }

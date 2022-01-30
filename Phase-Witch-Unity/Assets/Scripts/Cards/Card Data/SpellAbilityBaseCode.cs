@@ -17,6 +17,7 @@ public abstract class SpellAbilityBaseCode
         Numbers = numbers;
         AbilityType = numbers.AbilityType;
         Phase = phase;
+        SetTargettingDialogue();
     }
 
     public string GetSelectionDialogue()
