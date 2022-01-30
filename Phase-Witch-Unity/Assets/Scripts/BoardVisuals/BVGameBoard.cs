@@ -91,20 +91,28 @@ public class BVGameBoard : MonoBehaviour
 
     private IEnumerator MoveUnits()
     {
+        List<TilePiece> potentialUnits = new List<TilePiece>();
+        for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+        {
+            for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                if (GameBoard.GetDataAtPos(pos).HasPiece &&
+                    GameBoard.GetDataAtPos(pos).Piece.Faction == ActiveFaction)
+                {
+                    potentialUnits.Add(GameBoard.GetDataAtPos(pos).Piece);
+                }
+            }
+        }
+
         for (int i = 0; i < 2; ++i)
         {
             #region choose piece to move
             ValidTiles = new List<Vector2Int>();
-            for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+
+            foreach (TilePiece piece in potentialUnits)
             {
-                for (int x = 0; x < GameBoard.BoardSize.x; ++x)
-                {
-                    Vector2Int pos = new Vector2Int(x, y);
-                    if (GameBoard.GetDataAtPos(pos).HasPiece && GameBoard.GetDataAtPos(pos).Piece.Faction == ActiveFaction)
-                    {
-                        ValidTiles.Add(pos);
-                    }
-                }
+                ValidTiles.Add(piece.Position);
             }
 
             yield return StartCoroutine(AwaitTile());
@@ -113,7 +121,7 @@ public class BVGameBoard : MonoBehaviour
             #region step through selected piece's moves
             bool abort = false;
             TilePiece selected = GameBoard.GetDataAtPos(AwaitedTile.Value).Piece;
-            for (int m = 0; m < selected.MoveSpeed; ++m)
+            for (int m = 0; m < selected.MoveSpeed && !abort; ++m)
             {
                 ValidTiles = new List<Vector2Int>();
                 foreach (var pair in GameBoard.GetNeighboursValid(selected.Position))
@@ -129,6 +137,10 @@ public class BVGameBoard : MonoBehaviour
 
                 if (AwaitedTile.Value == selected.Position)
                 {
+                    if (m == 0)
+                    {
+                        abort = true;
+                    }
                     break;
                 }
                 else
@@ -137,6 +149,14 @@ public class BVGameBoard : MonoBehaviour
                     GameBoard.MovePiece(selected, AwaitedTile.Value);
                     BVTiles[AwaitedTile.Value.x, AwaitedTile.Value.y].AddPiece(bvPiece);
                 }
+            }
+            if (abort)
+            {
+                --i;
+            }
+            else
+            {
+                potentialUnits.Remove(selected);
             }
             #endregion
         }
