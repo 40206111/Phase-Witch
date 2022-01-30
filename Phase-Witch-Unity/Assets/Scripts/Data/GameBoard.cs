@@ -51,6 +51,10 @@ public static class GameBoard
             {
                 outList[(int)dir] = testPos;
             }
+            else
+            {
+                outList[(int)dir] = BoardSize;
+            }
         }
 
         return outList;
@@ -63,7 +67,7 @@ public static class GameBoard
         Vector2Int[] orderedList = GetNeighboursOrdered(pos);
         foreach (eDirection dir in EasyDir.OrderedEnum)
         {
-            if (orderedList[(int)dir] != null)
+            if (orderedList[(int)dir] != BoardSize)
             {
                 outList.Add(new KeyValuePair<eDirection, Vector2Int>(dir, orderedList[(int)dir]));
             }

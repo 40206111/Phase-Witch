@@ -109,12 +109,10 @@ public class BVGameBoard : MonoBehaviour
         {
             #region choose piece to move
             ValidTiles = new List<Vector2Int>();
-
             foreach (TilePiece piece in potentialUnits)
             {
                 ValidTiles.Add(piece.Position);
             }
-
             yield return StartCoroutine(AwaitTile());
             #endregion
 
@@ -164,21 +162,27 @@ public class BVGameBoard : MonoBehaviour
 
     private IEnumerator FaceUnits()
     {
+        List<TilePiece> potentialUnits = new List<TilePiece>();
+        for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+        {
+            for (int x = 0; x < GameBoard.BoardSize.x; ++x)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                if (GameBoard.GetDataAtPos(pos).HasPiece &&
+                    GameBoard.GetDataAtPos(pos).Piece.Faction == ActiveFaction)
+                {
+                    potentialUnits.Add(GameBoard.GetDataAtPos(pos).Piece);
+                }
+            }
+        }
         // ~~~ repeat for all units
-        for (int i = 0; i < 2; ++i)
+        while (potentialUnits.Count > 0)
         {
             #region choose piece to move
             ValidTiles = new List<Vector2Int>();
-            for (int y = 0; y < GameBoard.BoardSize.y; ++y)
+            foreach (TilePiece piece in potentialUnits)
             {
-                for (int x = 0; x < GameBoard.BoardSize.x; ++x)
-                {
-                    Vector2Int pos = new Vector2Int(x, y);
-                    if (GameBoard.GetDataAtPos(pos).HasPiece && GameBoard.GetDataAtPos(pos).Piece.Faction == ActiveFaction)
-                    {
-                        ValidTiles.Add(pos);
-                    }
-                }
+                ValidTiles.Add(piece.Position);
             }
             yield return StartCoroutine(AwaitTile());
             #endregion
@@ -194,15 +198,12 @@ public class BVGameBoard : MonoBehaviour
             yield return StartCoroutine(AwaitTile());
 
             Vector2Int facingDir = AwaitedTile.Value - selected.Position;
-            if (AwaitedTile.Value == selected.Position || facingDir == EasyDir.DirFromEnum(selected.Facing))
-            {
-                continue;
-            }
-            else
+            if (!(AwaitedTile.Value == selected.Position || facingDir == EasyDir.DirFromEnum(selected.Facing)))
             {
                 selected.ChangeFacing(EasyDir.EnumFromDir(facingDir));
                 BVTiles[selected.Position.x, selected.Position.y].BVPiece.RotateFacing(EasyDir.EnumFromDir(facingDir));
             }
+            potentialUnits.Remove(selected);
         }
     }
 
