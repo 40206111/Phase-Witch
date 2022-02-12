@@ -11,11 +11,15 @@ public class BVTile : MonoBehaviour
 
     public BVPiece BVPiece;
 
+    public bool Odd;
+
     // Start is called before the first frame update
     void Start()
     {
         TilePos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.z));
+        Odd = ((TilePos.x + TilePos.y) % 2) == 1;
         Material = GetComponentInChildren<MeshRenderer>().material;
+        SetHighlighting(false);
     }
 
     // Update is called once per frame
@@ -35,7 +39,7 @@ public class BVTile : MonoBehaviour
         }
         else
         {
-            progress = 1;
+            progress = Odd ? 0 : 1;
             SetMaterialColour(progress);
         }
         _isHighlighted = state;
@@ -44,7 +48,8 @@ public class BVTile : MonoBehaviour
     private void UpdateHighlighting()
     {
         // float halfHeight = 0.4f;
-        progress = (Mathf.Sin(Time.time * Mathf.PI) * 0.15f) + 0.2f;
+        progress = (Mathf.Sin(Time.time * Mathf.PI) * 0.15f) + 0.25f;
+        progress = !Odd ? progress + 0.5f : progress;
         SetMaterialColour(progress);
     }
 
